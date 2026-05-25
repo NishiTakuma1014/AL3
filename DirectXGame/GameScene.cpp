@@ -2,40 +2,28 @@
 
 using namespace KamataEngine;
 
-GameScene::~GameScene() {
-	
-	delete sprite_;
-
-	delete model_;
-	delete camera_;
-}
-
 void GameScene::Initialize() {
-	
-	//textureHandle_ = TextureManager::Load("./Resources/uvChecker.png");
-	textureHandle_ = TextureManager::Load("./Resources/mario.png");
-	sprite_ = Sprite::Create(textureHandle_, {100, 50});
+
+	textureHandle_ = TextureManager::Load("uvChecker.png");
 	model_ = Model::Create();
-
-	worldTransform_.Initialize();
-	camera_ = new Camera();
-	camera_->Initialize();
-
+	camera_.Initialize();
+	player_ = new Player();
+	player_->Initialize(model_, textureHandle_, &camera_);
 }
 
 void GameScene::Update() {
-	Vector2 position = sprite_->GetPosition();
-	position.x += 2.0f;
-	position.y += 1.0f;
-	sprite_->SetPosition(position);
+	player_->Update();
 }
 
 void GameScene::Draw() {
-	Sprite::PreDraw();
-	//sprite_->Draw();
-	Sprite::PostDraw();
 	Model::PreDraw();
-	model_->Draw(worldTransform_, *camera_,textureHandle_);
+	player_->Draw();
 	Model::PostDraw();
+}
 
+GameScene::~GameScene() {
+	delete model_;
+	model_ = nullptr;
+	delete player_;
+	player_ = nullptr;
 }
