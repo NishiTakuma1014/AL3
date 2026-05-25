@@ -6,6 +6,7 @@ using namespace KamataEngine;
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	KamataEngine::Initialize(L"GC1D_03_ニシ_タクマ");
 
+	
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	while (true) {
