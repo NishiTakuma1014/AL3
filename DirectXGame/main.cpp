@@ -10,15 +10,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ゲームシーンのインスタンスを生成
 	GameScene* gameScene = new GameScene();
 	gameScene->Initialize();
+	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
 	while (true) {
 		if (KamataEngine::Update()) {
 			break;
 		}
-
+		imguiManager->Begin();
+		gameScene->Update();
+		imguiManager->End();
 		dxCommon->PreDraw();
 		gameScene->Draw();
+		AxisIndicator::GetInstance()->Draw();
+		imguiManager->Draw();
 		dxCommon->PostDraw();
-		gameScene->Update();
+		
 	}
 
 	delete gameScene;
