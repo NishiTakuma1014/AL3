@@ -1,4 +1,3 @@
-#pragma once
 #include "KamataEngine.h"
 
 class Player {
@@ -24,4 +23,3 @@ private:
 	
 	KamataEngine::Camera* camera_ = nullptr;
 };
-#pragma once

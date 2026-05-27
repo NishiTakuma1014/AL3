@@ -1,9 +1,13 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Player.h"
+#include <vector>
 
 // ゲームシーン
 class GameScene {
+	KamataEngine::Model* blockModel_ = nullptr;
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks2_;
 
 public:
 	void Initialize();
