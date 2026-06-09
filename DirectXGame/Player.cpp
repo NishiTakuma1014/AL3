@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "cassert"
-
+#include"new.h"
 using namespace KamataEngine;
 
 void Player::Initialize(KamataEngine::Model* model, uint32_t textureHandle, KamataEngine::Camera* camera) {
@@ -14,6 +14,9 @@ void Player::Initialize(KamataEngine::Model* model, uint32_t textureHandle, Kama
 void Player::Update() {
 
 	worldTransform_.TransferMatrix();
+	// アフェイン変換行列の計算してメンバ変数に代入する定数バッファに転送する
+	UpdateWorldTransform(worldTransform_);
+
 }
 
 void Player::Draw() {

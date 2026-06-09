@@ -1,16 +1,16 @@
+#pragma once
 #include "KamataEngine.h"
-
-class Player {
+class Skydome {
 
 public:
 	void Initialize(KamataEngine::Model* model, uint32_t textureHandle, KamataEngine::Camera* camera);
 	void Update();
 	void Draw();
-private:
+
+	private:
 	KamataEngine::WorldTransform worldTransform_;
 	KamataEngine::Model* model_ = nullptr;
-	uint32_t textureHandle_ = 0u;
+	uint32_t textureHandle2_ = 0u;
 	KamataEngine::Camera* camera_ = nullptr;
-	KamataEngine::DebugCamera* debugCamera_ = nullptr;
-	int isDebugCameraActive_ = false;
 };
+

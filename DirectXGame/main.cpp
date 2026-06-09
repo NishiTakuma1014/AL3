@@ -1,4 +1,6 @@
 #include "GameScene.h"
+//#include "Player.h"
+#include "Skydome.h"
 #include <KamataEngine.h>
 #include <Windows.h>
 using namespace KamataEngine;
