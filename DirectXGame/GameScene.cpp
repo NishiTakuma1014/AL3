@@ -1,5 +1,7 @@
 #include "GameScene.h"
-#include "new.h" 
+#include "MapChipField.h"
+#include "new.h"
+#include <cassert>
 #include <cmath>
 
 using namespace KamataEngine;
@@ -9,37 +11,46 @@ void GameScene::Initialize() {
 	blockModel_ = Model::Create();
 	textureHandle_ = TextureManager::Load("./Resources/cube/cube.jpg");
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
-	texturePlayer_ = TextureManager::Load("./Resources/mario.png");
+	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
+	mapChipField_ = new MapChipField();
+	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
 	camera_.Initialize();
-
+	GenerateBlocks();
+	playerModel_ = Model::CreateFromOBJ("player", true);
+	player_ = new Player();
+	player_->Initialize(playerModel_, texturePlayer_, &camera_);
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
 
-	// 天球の生成と初期化 
+	// 天球の生成と初期化
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
+	//player_ = new Player();
+	//player_->Initialize(model_, texturePlayer_, &camera_);
+	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
+	player_->SetPosition(playerPosition);
 
-	player_ = new Player();
-	player_->Initialize(model_, texturePlayer_, &camera_);
-	//player_->worldTransform_.translation_ = {-1.0f, 2.0f, 0.0f};
-	
-	const uint32_t kNumBlockHorizontal = 20;
-	const uint32_t kNumBlockVertical = 10;
-	const float kBlockWidth = 1.0f;
-	const float kBlockHeight = 1.0f;
+	const uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
+	const uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+	/*const float kBlockWidth = 1.0f;
+	const float kBlockHeight = 1.0f;*/
 
-	worldTransformBlocks_.resize(kNumBlockVertical);
+	worldTransformBlocks_.resize(numBlockVertical);
 
-	for (uint32_t i = 0; i < kNumBlockVertical; ++i) {
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
+		worldTransformBlocks_[i].resize(numBlockHorizontal);
 
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
+		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+			MapChipType chipType = mapChipField_->GetMapChipTypeByIndex(j, i);
+			if (chipType == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->Initialize();
 
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * static_cast<float>(j);
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * static_cast<float>(i);
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j,i);
+				//worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * static_cast<float>(i);
+			}
 		}
 	}
 
@@ -48,19 +59,16 @@ void GameScene::Initialize() {
 
 // --- シーンの更新 ---
 void GameScene::Update() {
-	
 	if (Input::GetInstance()->TriggerKey(DIK_A)) {
 		isDebugCameraActive_ = !isDebugCameraActive_;
 	}
 
-	
 	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		camera_.matView = debugCamera_->GetCamera().matView;
 		camera_.matProjection = debugCamera_->GetCamera().matProjection;
-    	camera_.TransferMatrix();
-		
-	}else {
+		camera_.TransferMatrix();
+	} else {
 		camera_.TransferMatrix();
 	}
 
@@ -68,8 +76,11 @@ void GameScene::Update() {
 	skydome_->Update();
 
 	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
-		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {	
-		UpdateWorldTransform(*worldTransformBlocks_[i][j]);
+		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
+
+			if (worldTransformBlocks_[i][j] != nullptr) {
+				UpdateWorldTransform(*worldTransformBlocks_[i][j]);
+			}
 		}
 	}
 
@@ -80,16 +91,20 @@ void GameScene::Update() {
 void GameScene::Draw() {
 	Model::PreDraw();
 	skydome_->Draw();
-	player_->Draw();
 
 	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
 		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
-			model_->Draw(*worldTransformBlocks_[i][j], camera_, textureHandle_);
+			if (worldTransformBlocks_[i][j] != nullptr) {
+				blockModel_->Draw(*worldTransformBlocks_[i][j], camera_, textureHandle_);
+			}
 		}
 	}
+	player_->Draw();
 
 	Model::PostDraw();
 }
+
+void GameScene::GenerateBlocks() {}
 
 // --- デストラクタ ---
 GameScene::~GameScene() {
@@ -99,7 +114,9 @@ GameScene::~GameScene() {
 
 	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
 		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
-			delete worldTransformBlocks_[i][j];
+			if (worldTransformBlocks_[i][j] != nullptr) {
+				delete worldTransformBlocks_[i][j];
+			}
 		}
 		worldTransformBlocks_[i].clear();
 	}
@@ -114,5 +131,6 @@ GameScene::~GameScene() {
 	delete modelSkydome;
 	delete debugCamera_;
 	debugCamera_ = nullptr;
-
+	delete mapChipField_;
+	delete player_;
 }
