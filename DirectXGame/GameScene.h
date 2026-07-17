@@ -1,18 +1,17 @@
 #pragma once
 #include "KamataEngine.h"
-#include "Player.h"
-#include "Skydome.h" 
-#include <vector>
 #include "MapChipField.h"
+#include "Player.h"
+#include "Skydome.h"
+#include <vector>
 class GameScene {
 private:
 	KamataEngine::Model* blockModel_ = nullptr;
 	KamataEngine::Model* playerModel_ = nullptr;
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
-	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks2_;
 	KamataEngine::Model* modelSkydome = nullptr;
-	Skydome* skydome_ = nullptr; 
-	KamataEngine::DebugCamera* debugCamera_ = nullptr; 
+	Skydome* skydome_ = nullptr;
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 	bool isDebugCameraActive_ = false;
 	MapChipField* mapChipField_;
 	void GenerateBlocks();

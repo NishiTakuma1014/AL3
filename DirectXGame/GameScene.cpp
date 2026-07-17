@@ -16,43 +16,23 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
 	camera_.Initialize();
-	GenerateBlocks();
+
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new Player();
 	player_->Initialize(playerModel_, texturePlayer_, &camera_);
+
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
 
 	// 天球の生成と初期化
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
-	//player_ = new Player();
-	//player_->Initialize(model_, texturePlayer_, &camera_);
+
 	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
 	player_->SetPosition(playerPosition);
 
-	const uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
-	const uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
-	/*const float kBlockWidth = 1.0f;
-	const float kBlockHeight = 1.0f;*/
-
-	worldTransformBlocks_.resize(numBlockVertical);
-
-	for (uint32_t i = 0; i < numBlockVertical; ++i) {
-		worldTransformBlocks_[i].resize(numBlockHorizontal);
-
-		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
-			MapChipType chipType = mapChipField_->GetMapChipTypeByIndex(j, i);
-			if (chipType == MapChipType::kBlock) {
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransformBlocks_[i][j] = worldTransform;
-				worldTransformBlocks_[i][j]->Initialize();
-
-				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j,i);
-				//worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * static_cast<float>(i);
-			}
-		}
-	}
+	// ブロック生成処理はGenerateBlocks関数へ移動
+	GenerateBlocks();
 
 	debugCamera_ = new DebugCamera(1280, 720);
 }
@@ -104,7 +84,30 @@ void GameScene::Draw() {
 	Model::PostDraw();
 }
 
-void GameScene::GenerateBlocks() {}
+// --- ブロックの生成 ---
+void GameScene::GenerateBlocks() {
+	const uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
+	const uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+
+	worldTransformBlocks_.resize(numBlockVertical);
+
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
+		worldTransformBlocks_[i].resize(numBlockHorizontal);
+
+		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+			MapChipType chipType = mapChipField_->GetMapChipTypeByIndex(j, i);
+			if (chipType == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->Initialize();
+
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			} else {
+				worldTransformBlocks_[i][j] = nullptr;
+			}
+		}
+	}
+}
 
 // --- デストラクタ ---
 GameScene::~GameScene() {
@@ -129,8 +132,8 @@ GameScene::~GameScene() {
 	delete skydome_;
 	skydome_ = nullptr;
 	delete modelSkydome;
+	delete playerModel_;
 	delete debugCamera_;
 	debugCamera_ = nullptr;
 	delete mapChipField_;
-	delete player_;
 }
