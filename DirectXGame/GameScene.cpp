@@ -19,17 +19,18 @@ void GameScene::Initialize() {
 	GenerateBlocks();
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new Player();
-	player_->Initialize(playerModel_, texturePlayer_, &camera_);
+	//player_->Initialize(playerModel_, texturePlayer_, &camera_);
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
-
 	// 天球の生成と初期化
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
 	//player_ = new Player();
 	//player_->Initialize(model_, texturePlayer_, &camera_);
 	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
-	player_->SetPosition(playerPosition);
+	player_->Initialize(playerModel_, &camera_, playerPosition);
+	player_->SetTextureHandle(texturePlayer_);
+
 
 	const uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
 	const uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
