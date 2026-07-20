@@ -2,7 +2,7 @@
 #include "KamataEngine.h"
 
 class Player {
-	static inline const float kAcceleration = 0.1f; // 加速度の定数値
+
 public:
 	/// <summary>
 	/// 初期化
@@ -11,6 +11,20 @@ public:
 	void Update();
 	void Draw();
 	void SetTextureHandle(uint32_t textureHandle) { textureHandle_ = textureHandle; }
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
+	void SetCamera(KamataEngine::Camera* camera) { camera_ = camera; }
+	static inline const float kLimitRunSpeed = 0.5f; // 走る速度の制限値
+	enum class LRDirection { kRight, kLeft };
+	LRDirection lrDirection_ = LRDirection::kRight; // 左右方向の向き
+	float turnFirstrotationY_ = 0.0f;               // 初期の回転角度
+	float turnTimer_ = 0.0f;                        // 回転のタイマー
+	static inline const float kTimeTurn = 0.3f; // 回転にかかる時間
+	bool onGround_ = true;                          // 地面に接地しているかどうか
+	static inline const float kGravityAcceleration = 0.05f; // 重力加速度
+	static inline const float kLimitFallSpeed = 0.5f;       // 落下速度の制限値
+	static inline const float kJumpAcceleration = 0.2f;           // ジャンプ加速度
+	float groundY_ = 0.0f;                                   // 地面のY座標
 
 private:
 	KamataEngine::WorldTransform worldTransform_;
@@ -20,4 +34,5 @@ private:
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 	KamataEngine::Vector3 velocity_ = {};
 	int isDebugCameraActive_ = false;
+	static inline const float kAcceleration = 0.1f; 
 };

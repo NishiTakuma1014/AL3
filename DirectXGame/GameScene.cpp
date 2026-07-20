@@ -30,6 +30,12 @@ void GameScene::Initialize() {
 	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 	player_->SetTextureHandle(texturePlayer_);
+	// GameScene.cpp
+	cameraController_ = new CameraController();
+	cameraController_->Initialize();
+	cameraController_->SetTarget(player_);
+	cameraController_->Reset();
+	player_->SetCamera(&cameraController_->GetCameraPtr());
 
 
 	const uint32_t numBlockVertical = mapChipField_->GetNumBlockVertical();
@@ -86,6 +92,8 @@ void GameScene::Update() {
 	}
 
 	player_->Update();
+	// GameScene::Update
+	cameraController_->Update();
 }
 
 // --- シーンの描画 ---
@@ -96,7 +104,7 @@ void GameScene::Draw() {
 	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
 		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
 			if (worldTransformBlocks_[i][j] != nullptr) {
-				blockModel_->Draw(*worldTransformBlocks_[i][j], camera_, textureHandle_);
+				blockModel_->Draw(*worldTransformBlocks_[i][j], cameraController_->GetCamera(), textureHandle_);
 			}
 		}
 	}
@@ -130,8 +138,11 @@ GameScene::~GameScene() {
 	delete skydome_;
 	skydome_ = nullptr;
 	delete modelSkydome;
+	modelSkydome = nullptr;
 	delete debugCamera_;
 	debugCamera_ = nullptr;
 	delete mapChipField_;
-	delete player_;
+	mapChipField_ = nullptr;
+	delete cameraController_;
+	cameraController_ = nullptr;
 }

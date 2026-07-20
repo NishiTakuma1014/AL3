@@ -4,6 +4,7 @@
 #include "Skydome.h" 
 #include <vector>
 #include "MapChipField.h"
+#include"CameraController.h"
 class GameScene {
 private:
 	KamataEngine::Model* blockModel_ = nullptr;
@@ -16,6 +17,7 @@ private:
 	bool isDebugCameraActive_ = false;
 	MapChipField* mapChipField_;
 	void GenerateBlocks();
+	CameraController* cameraController_ = nullptr;
 
 public:
 	void Initialize();

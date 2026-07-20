@@ -80,3 +80,9 @@ void UpdateWorldTransform(WorldTransform& worldTransform) {
 	worldTransform.matWorld_ = MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
 	worldTransform.TransferMatrix();
 }
+
+KamataEngine::Vector3 Add(const KamataEngine::Vector3& v1, const KamataEngine::Vector3& v2) { return KamataEngine::Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z); }
+
+KamataEngine::Vector3 Lerp(const KamataEngine::Vector3& start, const KamataEngine::Vector3& end, float t) {
+	return KamataEngine::Vector3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.z + (end.z - start.z) * t);
+}
