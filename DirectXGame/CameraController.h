@@ -20,7 +20,7 @@ public:
 	void SetMovableArea(const Rect& area) { movableArea_ = area; }
 
 	const KamataEngine::Camera& GetCamera() const { return camera_; }
-	KamataEngine::Camera& GetCameraPtr() { return camera_; }
+	KamataEngine::Camera* GetCameraPtr() { return &camera_; }
 
 private:
 	Player* target_ = nullptr;

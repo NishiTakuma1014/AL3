@@ -1,10 +1,10 @@
 #pragma once
-#include <KamataEngine.h> // Vector3 を使うため
+#include <KamataEngine.h>
 #include <cstdint>
 #include <string>
 #include <vector>
 
-enum class MapChipType { kBlank,kBlock };
+enum class MapChipType { kBlank, kBlock };
 
 struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
@@ -29,4 +29,20 @@ public:
 	uint32_t GetNumBlockHorizontal() const { return KNumBlockHorizontal; }
 
 	KamataEngine::Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
+
+	struct IndexSet {
+		uint32_t xIndex;
+		uint32_t yIndex;
+	};
+
+	IndexSet GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position);
+
+	struct Rect {
+		float left;
+		float right;
+		float bottom;
+		float top;
+	};
+
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
 };
