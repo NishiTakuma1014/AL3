@@ -8,8 +8,8 @@ using namespace KamataEngine;
 
 // --- シーンの初期化 ---
 void GameScene::Initialize() {
-	blockModel_ = Model::Create();
-	textureHandle_ = TextureManager::Load("./Resources/cube/cube.jpg");
+	blockModel_ = Model::CreateFromOBJ("block", true);
+	textureHandle_ = TextureManager::Load("./Resources/block/block.png");
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
 	mapChipField_ = new MapChipField();

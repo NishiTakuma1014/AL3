@@ -15,8 +15,8 @@ private:
 	MapChipData mapChipData_;
 
 public:
-	static inline const float KBlockWidth = 2.0f;           // ブロックの幅
-	static inline const float KBlockHeight = 2.0f;          // ブロックの高さ
+	static inline const float KBlockWidth = 1.0f;           // ブロックの幅
+	static inline const float KBlockHeight = 1.0f;          // ブロックの高さ
 	static inline const uint32_t KNumBlockHorizontal = 100; // 横方向のブロック数
 	static inline const uint32_t KNumBlockVertical = 20;    // 縦方向のブロック数
 
