@@ -32,7 +32,8 @@ public:
 	bool onGround_ = true;                                                             // 地面に接地しているかどうか
 	static inline const float kGravityAcceleration = 0.05f;                            // 重力加速度
 	static inline const float kLimitFallSpeed = 0.5f;                                  // 落下速度の制限値
-	static inline const float kJumpAcceleration = 0.2f;                                // ジャンプ加速度
+	static inline const float kJumpAcceleration = 0.5f;                                // ジャンプ加速度
+	static inline const float kAttenuation = 0.2f;                                     // 速度減衰率
 	float groundY_ = 0.0f;                                                             // 地面のY座標
 	MapChipField* mapChipField_ = nullptr;                                             // マップチップフィールドのポインタ
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; } // マップチップフィールドの設定
