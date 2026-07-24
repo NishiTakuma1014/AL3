@@ -32,7 +32,7 @@ private:
 	Rect movableArea_ = {0.0f, 100.0f, 0.0f, 100.0f};
 
 	// 追従対象を画面内に収めるためのマージン
-	static inline const Rect kMargin = {-6.0f, 6.0f, -4.0f, 4.0f};
+	static inline const Rect kMargin = {-6.0f, 6.0f, 0.0f, 50.0f};
 
 	static inline const float kInterpolationRate = 0.1f; // 補間率の定数値
 	static inline const float kVelocityBias = 0.3f;      // 速度による目標座標補正の重み

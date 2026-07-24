@@ -8,7 +8,7 @@ class Player {
 	struct CollisionMapInfo {
 		bool ceilingCollision = false;         // 天井衝突フラグ
 		bool landing = false;                  // 着地フラグ
-		bool wallCollision = false;            // 壁接触フラグ
+		bool hitWall = false;                  // 壁接触フラグ
 		KamataEngine::Vector3 moveAmount = {}; // 移動量
 	};
 
@@ -25,15 +25,18 @@ public:
 	void SetCamera(KamataEngine::Camera* camera) { camera_ = camera; }
 	static inline const float kLimitRunSpeed = 0.5f; // 走る速度の制限値
 	enum class LRDirection { kRight, kLeft };
-	LRDirection lrDirection_ = LRDirection::kRight;                                    // 左右方向の向き
-	float turnFirstrotationY_ = 0.0f;                                                  // 初期の回転角度
-	float turnTimer_ = 0.0f;                                                           // 回転のタイマー
-	static inline const float kTimeTurn = 0.3f;                                        // 回転にかかる時間
-	bool onGround_ = true;                                                             // 地面に接地しているかどうか
-	static inline const float kGravityAcceleration = 0.05f;                            // 重力加速度
-	static inline const float kLimitFallSpeed = 0.5f;                                  // 落下速度の制限値
-	static inline const float kJumpAcceleration = 0.5f;                                // ジャンプ加速度
-	static inline const float kAttenuation = 0.2f;                                     // 速度減衰率
+	LRDirection lrDirection_ = LRDirection::kRight;         // 左右方向の向き
+	float turnFirstrotationY_ = 0.0f;                       // 初期の回転角度
+	float turnTimer_ = 0.0f;                                // 回転のタイマー
+	static inline const float kTimeTurn = 0.3f;             // 回転にかかる時間
+	bool onGround_ = true;                                  // 地面に接地しているかどうか
+	static inline const float kGravityAcceleration = 0.01f; // 重力加速度
+	static inline const float kLimitFallSpeed = 0.3f;       // 落下速度の制限値
+	static inline const float kJumpAcceleration = 0.2f;     // ジャンプ加速度
+	static inline const float kAttenuation = 0.2f;          // 速度減衰率
+	static inline const float kAttenuationWall = 0.2f;      // 壁接触時の速度減衰率
+
+	static inline const float kAttenuationLanding = 0.2f;                              // 着地時の速度減衰率
 	float groundY_ = 0.0f;                                                             // 地面のY座標
 	MapChipField* mapChipField_ = nullptr;                                             // マップチップフィールドのポインタ
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; } // マップチップフィールドの設定
@@ -41,9 +44,15 @@ public:
 	static inline const float kHeight = 0.8f;                                          // プレイヤーの高さ
 	void InputMove();                                                                  // 移動入力処理
 	void CollisionMap(CollisionMapInfo& collisionMapInfo);                             // マップ衝突判定
+	void CollisionMapTop(CollisionMapInfo& info);                                      // マップ衝突判定上方向
+	void CollisionMapBottom(CollisionMapInfo& info);                                   // マップ衝突判定下方向
+	void CollisionMapRight(CollisionMapInfo& info);                                    // マップ衝突判定右方向
+	void CollisionMapLeft(CollisionMapInfo& info);                                     // マップ衝突判定左方向
 	void MoveByCollisionResult(const CollisionMapInfo& info);                          // 判定結果を反映して移動させる
 	void CeilingCollision(const CollisionMapInfo& info);                               // 天井に接触している場合の処理
-	enum Corner { kLeftTop, kRightTop, kLeftBottom, kRightBottom, kNumCorners };       // プレイヤーの角の列挙型
+	void WallCollision(const CollisionMapInfo& info);                                  // 壁に接触している場合の処理
+	void GroundStateSwitch(const CollisionMapInfo& info);                              // 接地状態の切り替え処理
+	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorners };       // プレイヤーの角の列挙型
 	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center, Corner corner);
 
 private:

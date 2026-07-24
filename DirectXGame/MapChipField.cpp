@@ -5,7 +5,9 @@
 #include <sstream>
 #include <string>
 
-KamataEngine::Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return KamataEngine::Vector3(KBlockWidth * xIndex, KBlockHeight * yIndex, 0.0f); }
+KamataEngine::Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) {
+	return KamataEngine::Vector3(KBlockWidth * xIndex, KBlockHeight * (KNumBlockVertical - 1 - yIndex), 0.0f);
+}
 
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
@@ -59,8 +61,8 @@ MapChipType MapChipField::GetMapChipTypeByIndex(int32_t xIndex, int32_t yIndex) 
 
 MapChipField::IndexSet MapChipField::GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position) {
 	IndexSet indexSet = {};
-	indexSet.xIndex = static_cast<uint32_t>(position.x / KBlockWidth);
-	indexSet.yIndex = static_cast<uint32_t>(position.y / KBlockHeight);
+	indexSet.xIndex = static_cast<uint32_t>(position.x + (KBlockWidth / 2.0f) / KBlockWidth);
+	indexSet.yIndex = static_cast<uint32_t>(KNumBlockVertical - 1 - static_cast<uint32_t>(position.y + KBlockHeight / 2.0f) / KBlockHeight);
 	return indexSet;
 }
 

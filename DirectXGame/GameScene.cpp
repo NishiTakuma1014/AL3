@@ -8,8 +8,8 @@ using namespace KamataEngine;
 
 // --- シーンの初期化 ---
 void GameScene::Initialize() {
-	blockModel_ = Model::Create();
-	textureHandle_ = TextureManager::Load("./Resources/cube/cube.jpg");
+	blockModel_ = Model::CreateFromOBJ("block", true);
+	textureHandle_ = TextureManager::Load("./Resources/block/block.png");
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
 	mapChipField_ = new MapChipField();
@@ -27,17 +27,18 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
 
-	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
+	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 	player_->SetTextureHandle(texturePlayer_);
-	player_->SetMapChipField(mapChipField_); // ← マップチップ衝突判定に必須
+	player_->SetMapChipField(mapChipField_);
 
 	// カメラコントローラーの生成と初期化
 	cameraController_ = new CameraController();
 	cameraController_->Initialize();
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
-	player_->SetCamera(cameraController_->GetCameraPtr()); // ← &を削除
+	cameraController_->SetMovableArea({0.0f, 50.0f, 0.0f, 50.0f});
+	player_->SetCamera(cameraController_->GetCameraPtr()); 
 
 	// ブロック生成（関数化）
 	GenerateBlocks();
