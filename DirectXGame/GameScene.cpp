@@ -160,12 +160,8 @@ GameScene::~GameScene() {
 	modelSkydome = nullptr;
 	delete playerModel_;
 	playerModel_ = nullptr;
-	delete player_;
-	player_ = nullptr;
 	delete enemyModel_;
 	enemyModel_ = nullptr;
-	delete enemy_; 
-	enemy_ = nullptr;
 	delete debugCamera_;
 	debugCamera_ = nullptr;
 	delete mapChipField_;
