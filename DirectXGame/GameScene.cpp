@@ -12,13 +12,27 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("./Resources/block/block.png");
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
+	textureEnemy_ = TextureManager::Load("./Resources/enemy/enemy.png"); 
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
 	camera_.Initialize();
 
+	//playerの生成/初期化
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new Player();
+	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
+	player_->Initialize(playerModel_, &camera_, playerPosition);
+	player_->SetTextureHandle(texturePlayer_);
+	player_->SetMapChipField(mapChipField_);
+
+	// 敵の生成・初期化
+	enemyModel_ = Model::CreateFromOBJ("enemy", true);
+	enemy_ = new Enemy();
+	KamataEngine::Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(4, 18);
+	enemy_->Initialize(enemyModel_, &camera_, enemyPosition);
+	enemy_->SetTextureHandle(textureEnemy_);
+	enemy_->SetMapChipField(mapChipField_);
 
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
@@ -27,10 +41,6 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
 
-	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
-	player_->Initialize(playerModel_, &camera_, playerPosition);
-	player_->SetTextureHandle(texturePlayer_);
-	player_->SetMapChipField(mapChipField_);
 
 	// カメラコントローラーの生成と初期化
 	cameraController_ = new CameraController();
@@ -39,7 +49,7 @@ void GameScene::Initialize() {
 	cameraController_->Reset();
 	cameraController_->SetMovableArea({0.0f, 50.0f, 0.0f, 50.0f});
 	player_->SetCamera(cameraController_->GetCameraPtr()); 
-
+	enemy_->SetCamera(cameraController_->GetCameraPtr());
 	// ブロック生成（関数化）
 	GenerateBlocks();
 
@@ -74,6 +84,9 @@ void GameScene::Update() {
 	}
 
 	player_->Update();
+	
+    enemy_->Update();
+	
 	cameraController_->Update();
 }
 
@@ -90,6 +103,8 @@ void GameScene::Draw() {
 		}
 	}
 	player_->Draw();
+	enemy_->Draw();
+
 
 	Model::PostDraw();
 }
@@ -145,6 +160,12 @@ GameScene::~GameScene() {
 	modelSkydome = nullptr;
 	delete playerModel_;
 	playerModel_ = nullptr;
+	delete player_;
+	player_ = nullptr;
+	delete enemyModel_;
+	enemyModel_ = nullptr;
+	delete enemy_; 
+	enemy_ = nullptr;
 	delete debugCamera_;
 	debugCamera_ = nullptr;
 	delete mapChipField_;
