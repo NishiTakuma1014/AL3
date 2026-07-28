@@ -6,19 +6,18 @@
 
 using namespace KamataEngine;
 
-// --- シーンの初期化 ---
 void GameScene::Initialize() {
 	blockModel_ = Model::CreateFromOBJ("block", true);
 	textureHandle_ = TextureManager::Load("./Resources/block/block.png");
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
-	textureEnemy_ = TextureManager::Load("./Resources/enemy/enemy.png"); 
+	textureEnemy_ = TextureManager::Load("./Resources/enemy/enemy.png");
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
 	camera_.Initialize();
 
-	//playerの生成/初期化
+	// playerの生成/初期化
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new Player();
 	KamataEngine::Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
@@ -26,13 +25,18 @@ void GameScene::Initialize() {
 	player_->SetTextureHandle(texturePlayer_);
 	player_->SetMapChipField(mapChipField_);
 
-	// 敵の生成・初期化
+	// 敵モデルの読み込み
 	enemyModel_ = Model::CreateFromOBJ("enemy", true);
-	enemy_ = new Enemy();
-	KamataEngine::Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(4, 18);
-	enemy_->Initialize(enemyModel_, &camera_, enemyPosition);
-	enemy_->SetTextureHandle(textureEnemy_);
-	enemy_->SetMapChipField(mapChipField_);
+
+	// 敵の複数生成
+	for (int32_t i = 0; i < kNumEnemies; ++i) {
+		Enemy* newEnemy = new Enemy();
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(4 + i * 3, 18);
+		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
+		newEnemy->SetTextureHandle(textureEnemy_);
+		newEnemy->SetMapChipField(mapChipField_);
+		enemies_.push_back(newEnemy);
+	}
 
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
@@ -41,21 +45,47 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome, textureHandle2_, &camera_);
 
-
 	// カメラコントローラーの生成と初期化
 	cameraController_ = new CameraController();
 	cameraController_->Initialize();
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
 	cameraController_->SetMovableArea({0.0f, 50.0f, 0.0f, 50.0f});
-	player_->SetCamera(cameraController_->GetCameraPtr()); 
-	enemy_->SetCamera(cameraController_->GetCameraPtr());
+	player_->SetCamera(cameraController_->GetCameraPtr());
+
+	// 敵にもカメラを設定
+	for (Enemy* enemy : enemies_) {
+		enemy->SetCamera(cameraController_->GetCameraPtr());
+	}
+
 	// ブロック生成（関数化）
 	GenerateBlocks();
 
 	debugCamera_ = new DebugCamera(1280, 720);
 }
+void GameScene::CheckAllCollisions() {
 
+	{
+		AABB aabb1, aabb2;
+
+		// 自キャラの座標
+		aabb1 = player_->GetAABB();
+
+		// 自キャラと全ての敵の当たり判定
+		for (Enemy* enemy : enemies_) {
+			aabb2 = enemy->GetAABB();
+
+			// AABB同士の交差判定
+			if (IsCollision(aabb1, aabb2)) {
+				// 自キャラの衝突時コールバックを呼び出す
+				player_->OnCollision(enemy);
+				// 敵の衝突時コールバックを呼び出す
+				enemy->OnCollision(player_);
+			}
+		}
+	}
+
+}
 // --- シーンの更新 ---
 void GameScene::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_A)) {
@@ -71,12 +101,10 @@ void GameScene::Update() {
 		camera_.TransferMatrix();
 	}
 
-	// 天球の更新
 	skydome_->Update();
 
 	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
 		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
-
 			if (worldTransformBlocks_[i][j] != nullptr) {
 				UpdateWorldTransform(*worldTransformBlocks_[i][j]);
 			}
@@ -84,10 +112,14 @@ void GameScene::Update() {
 	}
 
 	player_->Update();
-	
-    enemy_->Update();
-	
+
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
+
 	cameraController_->Update();
+	//すべての当たり判定
+	CheckAllCollisions();
 }
 
 // --- シーンの描画 ---
@@ -103,8 +135,10 @@ void GameScene::Draw() {
 		}
 	}
 	player_->Draw();
-	enemy_->Draw();
 
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
 
 	Model::PostDraw();
 }
@@ -134,6 +168,8 @@ void GameScene::GenerateBlocks() {
 	}
 }
 
+
+
 // --- デストラクタ ---
 GameScene::~GameScene() {
 	if (blockModel_ != nullptr) {
@@ -160,8 +196,10 @@ GameScene::~GameScene() {
 	modelSkydome = nullptr;
 	delete playerModel_;
 	playerModel_ = nullptr;
-	delete enemyModel_;
-	enemyModel_ = nullptr;
+	for (Enemy* enemy : enemies_) {
+		delete enemy;
+	}
+	enemies_.clear();
 	delete debugCamera_;
 	debugCamera_ = nullptr;
 	delete mapChipField_;

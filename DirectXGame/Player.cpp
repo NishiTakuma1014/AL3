@@ -8,6 +8,14 @@
 
 using namespace KamataEngine;
 
+Vector3 Player::GetWorldPosition() {
+	Vector3 worldPos;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
+}
+
 void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
 	assert(model);
 	model_ = model;
@@ -135,9 +143,9 @@ void Player::InputMove() {
 			groundY_ = worldTransform_.translation_.y; // ジャンプする直前の高さを記憶
 			velocity_.y = kJumpAcceleration;
 			onGround_ = false;
-		} else {
-			velocity_.y = 0.0f;
-		}
+		} //else {
+			//velocity_.y = 0.0f;
+		//}
 	}
 }
 
@@ -403,4 +411,24 @@ void Player::CollisionMapRight(CollisionMapInfo& info) {
 		}
 	}
 }
+
+bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
+	if (aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x && aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y && aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z) {
+		return true;
+	}
+	return false;
+}
 	
+AABB Player::GetAABB() {
+	Vector3 worldPos = GetWorldPosition();
+
+	AABB aabb;
+	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
+	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
+	return aabb;
+}
+
+void Player::OnCollision(const Enemy* enemy) {
+	(void)enemy;
+	velocity_.y = kJumpAcceleration;
+}

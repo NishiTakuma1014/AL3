@@ -2,7 +2,14 @@
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include <array>
+
+class Enemy;
 class MapChipField;
+struct AABB {
+	KamataEngine::Vector3 min;
+	KamataEngine::Vector3 max;
+};
+bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 class Player {
 	// マップとの当たり判定情報
 	struct CollisionMapInfo {
@@ -11,6 +18,8 @@ class Player {
 		bool hitWall = false;                  // 壁接触フラグ
 		KamataEngine::Vector3 moveAmount = {}; // 移動量
 	};
+
+
 
 public:
 	/// <summary>
@@ -54,6 +63,9 @@ public:
 	void GroundStateSwitch(const CollisionMapInfo& info);                              // 接地状態の切り替え処理
 	enum Corner { kRightBottom, kLeftBottom, kRightTop, kLeftTop, kNumCorners };       // プレイヤーの角の列挙型
 	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center, Corner corner);
+	KamataEngine::Vector3 GetWorldPosition();
+	AABB GetAABB();
+	void OnCollision(const Enemy* enemy);
 
 private:
 	KamataEngine::WorldTransform worldTransform_;

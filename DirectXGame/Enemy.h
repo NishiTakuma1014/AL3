@@ -3,11 +3,13 @@
 #include "MapChipField.h"
 #include <array>
 #include"new.h"
+#include"Player.h"
 using namespace KamataEngine;
 
 /// <summary>
 /// 敵
 /// </summary>
+class Player;
 class Enemy {
 public:
 	void Initialize(Model* model, Camera* camera, const Vector3& position);
@@ -22,7 +24,12 @@ public:
 	static inline const float kWalkMotionAngleEnd = 30.0f;//最後の角度
 	static inline const float kWalkMotionTime = 1.0f;//アニメーションの時間
 	float walkTimer_ = 0.0f;//経過時間
+	void OnCollision(const Player* player);
+	KamataEngine::Vector3 GetWorldPosition();
+	AABB GetAABB();            
 
+	static inline const float kWidth = 0.8f;  
+	static inline const float kHeight = 0.8f; 
 
 private:
 	KamataEngine::WorldTransform worldTransform_;

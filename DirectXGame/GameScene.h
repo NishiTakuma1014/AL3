@@ -6,6 +6,7 @@
 #include "MapChipField.h"
 #include"CameraController.h"
 #include"Enemy.h"
+#include <list>   
 class GameScene {
 private:
 	KamataEngine::Model* blockModel_ = nullptr;
@@ -13,6 +14,8 @@ private:
 	KamataEngine::Model* enemyModel_ = nullptr;
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks2_;
+	std::list<Enemy*> enemies_;
+	static inline const int32_t kNumEnemies = 3; 
 	KamataEngine::Model* modelSkydome = nullptr;
 	Skydome* skydome_ = nullptr; 
 	KamataEngine::DebugCamera* debugCamera_ = nullptr; 
@@ -20,6 +23,7 @@ private:
 	MapChipField* mapChipField_;
 	void GenerateBlocks();
 	CameraController* cameraController_ = nullptr;
+	void CheckAllCollisions();
 
 public:
 	void Initialize();
