@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "MapChipField.h"
 #include "new.h"
+#include"DeathParticles.h"
 #include <cassert>
 #include <cmath>
 
@@ -12,6 +13,7 @@ void GameScene::Initialize() {
 	textureHandle2_ = TextureManager::Load("./Resources/SkyDome/sky_sphere.png");
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
 	textureEnemy_ = TextureManager::Load("./Resources/enemy/enemy.png");
+	textureDeathParticle_ = TextureManager::Load("./Resources/deathParticle/white1x1.png");
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
@@ -37,6 +39,12 @@ void GameScene::Initialize() {
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
 	}
+
+	// 仮の生成処理。後で消す。
+	modelDeathParticle_ = Model::CreateFromOBJ("deathParticle", true); 
+	deathParticles_ = new DeathParticles();
+	deathParticles_->Initialize(modelDeathParticle_, &camera_, playerPosition); 
+	deathParticles_->SetTextureHandle(textureDeathParticle_);
 
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
@@ -120,6 +128,10 @@ void GameScene::Update() {
 	cameraController_->Update();
 	//すべての当たり判定
 	CheckAllCollisions();
+	//パーティクル
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 }
 
 // --- シーンの描画 ---
@@ -140,7 +152,12 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 
+		// パーティクル
+	if (deathParticles_) {
+		deathParticles_->Draw();
+	}
 	Model::PostDraw();
+
 }
 
 // --- ブロックの生成 ---
@@ -206,4 +223,11 @@ GameScene::~GameScene() {
 	mapChipField_ = nullptr;
 	delete cameraController_;
 	cameraController_ = nullptr;
+
+	if (deathParticles_) {
+		delete deathParticles_;
+		deathParticles_ = nullptr;
+	}
+	delete modelDeathParticle_;
+	modelDeathParticle_ = nullptr;
 }

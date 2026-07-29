@@ -7,6 +7,7 @@
 #include"CameraController.h"
 #include"Enemy.h"
 #include <list>   
+#include"DeathParticles.h"
 class GameScene {
 private:
 	KamataEngine::Model* blockModel_ = nullptr;
@@ -24,6 +25,9 @@ private:
 	void GenerateBlocks();
 	CameraController* cameraController_ = nullptr;
 	void CheckAllCollisions();
+	DeathParticles* deathParticles_ = nullptr;
+	KamataEngine::Model* modelDeathParticle_ = nullptr; 
+
 
 public:
 	void Initialize();
@@ -31,7 +35,7 @@ public:
 	void Draw();
 
 	~GameScene();
-
+	uint32_t textureDeathParticle_ = 0;
 	uint32_t textureHandle_ = 0;
 	uint32_t textureHandle2_ = 0;
 	uint32_t texturePlayer_ = 0;

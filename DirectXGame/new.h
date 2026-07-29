@@ -12,3 +12,5 @@ KamataEngine::Vector3& operator+=(KamataEngine::Vector3& v1, const KamataEngine:
 KamataEngine::Vector3 Add(const KamataEngine::Vector3& v1, const KamataEngine::Vector3& v2);
 KamataEngine::Vector3 Lerp(const KamataEngine::Vector3& start, const KamataEngine::Vector3& end, float t);
 void UpdateWorldTransform(KamataEngine::WorldTransform& worldTransform);
+KamataEngine::Matrix4x4 MakeRotateZMatrix(float radian);
+KamataEngine::Vector3 Transform(const KamataEngine::Vector3& vector, const KamataEngine::Matrix4x4& matrix);
