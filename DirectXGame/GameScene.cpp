@@ -4,6 +4,7 @@
 #include"DeathParticles.h"
 #include <cassert>
 #include <cmath>
+#include"TitleScene.h"
 
 using namespace KamataEngine;
 
@@ -14,11 +15,13 @@ void GameScene::Initialize() {
 	texturePlayer_ = TextureManager::Load("./Resources/player/player.png");
 	textureEnemy_ = TextureManager::Load("./Resources/enemy/enemy.png");
 	textureDeathParticle_ = TextureManager::Load("./Resources/deathParticle/white1x1.png");
+	textureTitleScene_ = TextureManager::Load("./Resources/titleFont/white1x1.png");
+	//titleScene_ = new TitleScene();
+	//titleScene_->SetTextureHandle(textureTitleScene_);
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("./Resources/mapchip.csv");
 	model_ = Model::Create();
 	camera_.Initialize();
-
 	// playerの生成/初期化
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new Player();
@@ -26,6 +29,8 @@ void GameScene::Initialize() {
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 	player_->SetTextureHandle(texturePlayer_);
 	player_->SetMapChipField(mapChipField_);
+	// tetileScene_の初期化
+	//TitleModel_ = Model::CreateFromOBJ("title", true);
 
 	// 敵モデルの読み込み
 	enemyModel_ = Model::CreateFromOBJ("enemy", true);
@@ -39,12 +44,9 @@ void GameScene::Initialize() {
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
 	}
-
-	// 仮の生成処理。後で消す。
-	modelDeathParticle_ = Model::CreateFromOBJ("deathParticle", true); 
-	deathParticles_ = new DeathParticles();
-	deathParticles_->Initialize(modelDeathParticle_, &camera_, playerPosition); 
-	deathParticles_->SetTextureHandle(textureDeathParticle_);
+	// デスパーティクル用モデル・テクスチャの読み込み（発生自体は死亡時に行う）
+	modelDeathParticle_ = Model::CreateFromOBJ("deathParticle", true);
+	textureDeathParticle_ = TextureManager::Load("./Resources/deathParticle/white1x1.png");
 
 	// 天球モデルの読み込み
 	modelSkydome = Model::CreateFromOBJ("skydome", true);
@@ -65,6 +67,8 @@ void GameScene::Initialize() {
 	for (Enemy* enemy : enemies_) {
 		enemy->SetCamera(cameraController_->GetCameraPtr());
 	}
+
+	phase_ = Phase::kPlay;
 
 	// ブロック生成（関数化）
 	GenerateBlocks();
@@ -109,29 +113,62 @@ void GameScene::Update() {
 		camera_.TransferMatrix();
 	}
 
-	skydome_->Update();
+	switch (phase_) {
+	case Phase::kPlay:
+		// 天球の更新
+		skydome_->Update();
 
-	for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
-		for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
-			if (worldTransformBlocks_[i][j] != nullptr) {
-				UpdateWorldTransform(*worldTransformBlocks_[i][j]);
+		// ブロックの更新
+		for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
+			for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
+				if (worldTransformBlocks_[i][j] != nullptr) {
+					UpdateWorldTransform(*worldTransformBlocks_[i][j]);
+				}
 			}
 		}
+
+		// 自キャラの更新
+		player_->Update();
+
+		// 敵の更新
+		for (Enemy* enemy : enemies_) {
+			enemy->Update();
+		}
+
+		// カメラコントローラーの更新
+		cameraController_->Update();
+
+		// 全ての当たり判定
+		CheckAllCollisions();
+		break;
+
+	case Phase::kDeath:
+		// 天球の更新
+		skydome_->Update();
+
+		// ブロックの更新
+		for (size_t i = 0; i < worldTransformBlocks_.size(); ++i) {
+			for (size_t j = 0; j < worldTransformBlocks_[i].size(); ++j) {
+				if (worldTransformBlocks_[i][j] != nullptr) {
+					UpdateWorldTransform(*worldTransformBlocks_[i][j]);
+				}
+			}
+		}
+
+		// 敵の更新
+		for (Enemy* enemy : enemies_) {
+			enemy->Update();
+		}
+
+		// デスパーティクルの更新
+		if (deathParticles_) {
+			deathParticles_->Update();
+		}
+		break;
 	}
 
-	player_->Update();
-
-	for (Enemy* enemy : enemies_) {
-		enemy->Update();
-	}
-
-	cameraController_->Update();
-	//すべての当たり判定
-	CheckAllCollisions();
-	//パーティクル
-	if (deathParticles_) {
-		deathParticles_->Update();
-	}
+	// フェーズの切り替え要求
+	ChangePhase();
 }
 
 // --- シーンの描画 ---
@@ -146,18 +183,22 @@ void GameScene::Draw() {
 			}
 		}
 	}
-	player_->Draw();
+
+	// 自キャラの描画（デス演出中は非表示）
+	if (phase_ == Phase::kPlay) {
+		player_->Draw();
+	}
 
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
 
-		// パーティクル
+	// パーティクル
 	if (deathParticles_) {
 		deathParticles_->Draw();
 	}
-	Model::PostDraw();
 
+	Model::PostDraw();
 }
 
 // --- ブロックの生成 ---
@@ -185,7 +226,31 @@ void GameScene::GenerateBlocks() {
 	}
 }
 
+void GameScene::ChangePhase() {
+	switch (phase_) {
+	case Phase::kPlay:
+		// 自キャラがデス状態
+		if (player_->IsDead()) {
+			// デス演出フェーズに切り替え
+			phase_ = Phase::kDeath;
+			// 自キャラの座標を取得
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+			// 自キャラの座標にデスパーティクルを発生、初期化
+			deathParticles_ = new DeathParticles();
+			deathParticles_->Initialize(modelDeathParticle_, &camera_, deathParticlesPosition);
+			deathParticles_->SetTextureHandle(textureDeathParticle_);
+		}
+		break;
 
+	case Phase::kDeath:
+		// デスパーティクルが有効で、かつパーティクルの演出が終了したら
+		// ゲームシーンの終了フラグを立てる
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
+		break;
+	}
+}
 
 // --- デストラクタ ---
 GameScene::~GameScene() {

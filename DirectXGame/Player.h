@@ -44,7 +44,6 @@ public:
 	static inline const float kJumpAcceleration = 0.2f;     // ジャンプ加速度
 	static inline const float kAttenuation = 0.2f;          // 速度減衰率
 	static inline const float kAttenuationWall = 0.2f;      // 壁接触時の速度減衰率
-
 	static inline const float kAttenuationLanding = 0.2f;                              // 着地時の速度減衰率
 	float groundY_ = 0.0f;                                                             // 地面のY座標
 	MapChipField* mapChipField_ = nullptr;                                             // マップチップフィールドのポインタ
@@ -66,6 +65,9 @@ public:
 	KamataEngine::Vector3 GetWorldPosition();
 	AABB GetAABB();
 	void OnCollision(const Enemy* enemy);
+	// デスフラグ
+	bool isDead_ = false;
+	bool IsDead() const { return isDead_; }
 
 private:
 	KamataEngine::WorldTransform worldTransform_;

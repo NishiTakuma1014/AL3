@@ -1,7 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include <array>
-#include<numbers>
+#include <numbers>
 using namespace KamataEngine;
 
 /// <summary>
@@ -15,9 +15,11 @@ public:
 	void Update();
 	void Draw();
 	void SetTextureHandle(uint32_t textureHandle) { textureHandle_ = textureHandle; }
-	static inline const float kDuration = 2.0f;//存続時間
+	// 演出が終了したかどうか
+	bool IsFinished() const { return isFinished_; }
+	static inline const float kDuration = 2.0f; // 存続時間
 	static inline const float kSpeed = 0.2f;
-	static inline const float kAngleUnit = std::numbers::pi_v<float> * 2.0f / kNumParticles; 
+	static inline const float kAngleUnit = std::numbers::pi_v<float> * 2.0f / kNumParticles;
 
 private:
 	Model* model_ = nullptr;
